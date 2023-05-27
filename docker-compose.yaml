@@ -1,0 +1,39 @@
+version: '3'
+networks:
+  bridge-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/24
+volumes:
+  mysql-db-volume:
+  wordpress-app-volume:
+services:
+  mysql-db:
+    image: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_USER=wordpress
+      - MYSQL_PASSWORD=wordpress
+      - MYSQL_DATABASE=wordpress
+    volumes:
+      - mysql-db-volume:/var/lib/mysql
+    networks:
+      - bridge-network
+  wordpress-app:
+    image: wordpress
+    environment:
+      - WORDPRESS_DB_HOST=mysql
+      - WORDPRESS_DB_USER=wordpress
+      - WORDPRESS_DB_PASSWORD=wordpress
+      - WORDPRESS_DB_NAME=wordpress
+    ports:
+      - 8080:80
+    volumes:
+      - wordpress-app-volume:/var/www/html
+    networks:
+      - bridge-network
+    restart: always
+    depends_on:
+      - mysql-db
